@@ -86,33 +86,29 @@ It has been developed with the help of a great many people including (but not li
 
 		//swirly ring thing
 		var ringSwirl = new THREE.Object3D;
-		var ringSegments = 150;
+		var ringSegments = 30;
 
 		for (var i = 0; i < ringSegments; i++){
-			var geometry = new THREE.RingGeometry( i/4+.01, i/4+.23, 50 );
+			//var geometry = new THREE.RingGeometry( i/4+.01, i/4+.23, 50 );
+			var geometry = new THREE.TorusGeometry( i/4+.01, .4, 10, 50 );
 			var material = new THREE.MeshNormalMaterial( {side: THREE.DoubleSide } );
 			var mesh = new THREE.Mesh( geometry, material );
 			ringSwirl.add(mesh);
 		}
 
 		ringSwirl.scale.set(1,1,1);
-		ringSwirl.position.set(-0,0,-20);
+		ringSwirl.position.set(-0,0,-10);
 		scene.add( ringSwirl );
 
 
-		var t = 1;
 		/*
 		Request animation frame loop function
 		*/
-
-
 		function animate() {
-
-			t+=1
 
 			//ring sculpture rotations
 			for (var i = 0; i < ringSegments; i++){
-				ringSwirl.children[i].rotation.y += .001 * i;
+				ringSwirl.children[i].rotation.y += .0005 * i;
 			}
 
 			//Update VR headset position and apply to camera.

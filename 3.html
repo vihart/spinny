@@ -62,6 +62,7 @@ It has been developed with the help of a great many people including (but not li
 	<script>
 		// Setup three.js WebGL renderer
 		var renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0x6699cc, 1 );
 
 		// Append the canvas element created by the renderer to document body element.
 		document.body.appendChild( renderer.domElement );
@@ -86,33 +87,53 @@ It has been developed with the help of a great many people including (but not li
 
 		//swirly ring thing
 		var ringSwirl = new THREE.Object3D;
-		var ringSegments = 150;
+		var ringSegments = 30;
+		var ring = [];
+		// for (var i = 0; i < ringSegments; i++){
+		// 	//var geometry = new THREE.RingGeometry( i/4+.01, i/4+.23, 50 );
+		// 	var geometry = new THREE.TorusGeometry( i/4+.01, .4, 10, 50 );
+		// 	var material = new THREE.MeshNormalMaterial( {side: THREE.DoubleSide } );
+		// 	var mesh = new THREE.Mesh( geometry, material );
+		// 	ringSwirl.add(mesh);
+		// }
 
 		for (var i = 0; i < ringSegments; i++){
-			var geometry = new THREE.RingGeometry( i/4+.01, i/4+.23, 50 );
-			var material = new THREE.MeshNormalMaterial( {side: THREE.DoubleSide } );
-			var mesh = new THREE.Mesh( geometry, material );
-			ringSwirl.add(mesh);
+			ring[i] = new THREE.Object3D;
+
+			for (var j = 0; j < ringSegments; j++){
+				var geometry = new THREE.IcosahedronGeometry( .1+j/10, 1 );
+				var material = new THREE.MeshPhongMaterial({color:0x99cc33});
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.position.x = j;
+				ring[i].add(mesh);
+			}
+
+			ringSwirl.add(ring[i]);
 		}
 
 		ringSwirl.scale.set(1,1,1);
-		ringSwirl.position.set(-0,0,-20);
+		ringSwirl.position.set(-0,0,-10);
 		scene.add( ringSwirl );
 
 
-		var t = 1;
+		//create light
+		var light = new THREE.PointLight( 0xffffff, 2, 8000);
+		light.position.set( 0,0,0);
+		scene.add( light );
+
+
 		/*
 		Request animation frame loop function
 		*/
-
-
 		function animate() {
-
-			t+=1
 
 			//ring sculpture rotations
 			for (var i = 0; i < ringSegments; i++){
-				ringSwirl.children[i].rotation.y += .001 * i;
+				ringSwirl.children[i].rotation.y += .0002 * i;
+				ring[i].rotation.x += .0002 * i;
+				for (var j = 0; j < ringSegments; j++){
+					ring[i].rotation.z += .00002 * j;
+				}
 			}
 
 			//Update VR headset position and apply to camera.
