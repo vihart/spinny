@@ -89,13 +89,6 @@ It has been developed with the help of a great many people including (but not li
 		var ringSwirl = new THREE.Object3D;
 		var ringSegments = 30;
 		var ring = [];
-		// for (var i = 0; i < ringSegments; i++){
-		// 	//var geometry = new THREE.RingGeometry( i/4+.01, i/4+.23, 50 );
-		// 	var geometry = new THREE.TorusGeometry( i/4+.01, .4, 10, 50 );
-		// 	var material = new THREE.MeshNormalMaterial( {side: THREE.DoubleSide } );
-		// 	var mesh = new THREE.Mesh( geometry, material );
-		// 	ringSwirl.add(mesh);
-		// }
 
 		for (var i = 0; i < ringSegments; i++){
 			ring[i] = new THREE.Object3D;
@@ -112,7 +105,8 @@ It has been developed with the help of a great many people including (but not li
 		}
 
 		ringSwirl.scale.set(1,1,1);
-		ringSwirl.position.set(-0,0,-10);
+		ringSwirl.rotation.y = 1.6;
+		ringSwirl.position.set(-0,0,-40);
 		scene.add( ringSwirl );
 
 

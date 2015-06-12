@@ -1,0 +1,185 @@
+<!--
+
+Based on the standard ThreeJS-based boilerplate for webVR
+	currently being used by the eleVR team.
+
+It has oculus support for webVR browsers, support for the non-VR web,
+	and support for smartphone on google cardboard or similar VR device.
+
+Supported Navigation Controls:
+	WASD + E/Q navigation support for rotation.
+	Arrow key navigation support for moving the location of the camera.
+	Gamepad joystick navigation controls.
+	Orientation control with a VR headset OR mobile phone.
+
+Click to enter full-screen VR mode.
+
+This boilerplate is based on Mozilla's boilerplate: https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
+
+It has been developed with the help of a great many people including (but not limited to) Vi Hart, Andrew Lutomirski, Henry Segerman, and the Firefox webVR team.
+
+-->
+
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<title>Daisy</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+
+	<body>
+	<!--improvised music by Vi Hart, creative commons-->
+	<audio id='music' src="media/daisy.mp3" autoplay=true loop=true/>
+	</body>
+
+	<!--
+	three.js 3d library
+	-->
+	<script src="js/lib/three.min.js"></script>
+
+	<!--
+	PhoneVR acquires positional information from phone orientation. This is used by VRControls.js
+	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
+	 -->
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
+
+	<!--
+	VREffect.js handles stereo camera setup and rendering.
+	-->
+	<script src="js/vr/VREffect.js"></script>
+
+
+	<script>
+		// Setup three.js WebGL renderer
+		var renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0x6699cc, 1 );
+
+		// Append the canvas element created by the renderer to document body element.
+		document.body.appendChild( renderer.domElement );
+
+		//Create a three.js scene
+		var scene = new THREE.Scene();
+
+		//Create a three.js camera
+		var camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 2, 10000 );
+		scene.add(camera);
+
+		//Apply VR headset positional data to camera.
+		var controls = new THREE.VRControls( camera );
+		// controls.enableGamepad(false);
+		// controls.enableWASD(false);
+		// controls.enableArrows(false);
+
+		//Apply VR stereo rendering to renderer
+		var effect = new THREE.VREffect( renderer );
+		effect.setSize( window.innerWidth, window.innerHeight );
+
+
+		//swirly ring thing
+		var ringSwirl = new THREE.Object3D;
+		var ringSegments = 30;
+		var ring = [];
+
+		for (var i = 0; i < ringSegments; i++){
+			ring[i] = new THREE.Object3D;
+
+			for (var j = 0; j < ringSegments; j++){
+				var geometry = new THREE.IcosahedronGeometry( .1+j/10, 1 );
+				var material = new THREE.MeshPhongMaterial({color:0x99cc33});
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.position.x = j;
+				ring[i].add(mesh);
+			}
+
+			ringSwirl.add(ring[i]);
+		}
+
+		ringSwirl.scale.set(1,1,1);
+		ringSwirl.rotation.y = 1.6;
+		ringSwirl.position.set(-0,0,-40);
+		scene.add( ringSwirl );
+
+
+		//create light
+		var light = new THREE.PointLight( 0xffffff, 2, 8000);
+		light.position.set( 0,0,0);
+		scene.add( light );
+
+
+		/*
+		Request animation frame loop function
+		*/
+		function animate() {
+
+			//ring sculpture rotations
+			for (var i = 0; i < ringSegments; i++){
+				ringSwirl.children[i].rotation.y += .0002 * i;
+				ring[i].rotation.x += .0002 * i;
+				for (var j = 0; j < ringSegments; j++){
+					ring[i].rotation.z += .00002 * j;
+				}
+			}
+
+			//Update VR headset position and apply to camera.
+			controls.update();
+
+			// Render the scene through the VREffect.
+			effect.render( scene, camera );
+			requestAnimationFrame( animate )
+		}
+
+		animate();	// Kick off animation loop
+
+		/*
+		Listen for click event to enter full-screen mode.
+		We listen for single click because that works best for mobile for now
+		*/
+		document.body.addEventListener( 'click', function(){
+			effect.setFullScreen( true );
+		})
+
+		/*
+		Listen for keyboard events
+		*/
+		function onkey(event) {
+	    event.preventDefault();
+
+	    if (event.keyCode == 90) { // z
+	    	controls.resetSensor(); //zero rotation
+	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+	    	effect.setFullScreen(true) //fullscreen
+	    } else if (event.keyCode == 32 || event.keyCode == 80) {//space or p
+	  		var music = document.querySelector('#music');
+	  		if (music.paused){
+	  			music.play();
+	  		} else{
+	  			music.pause();
+	  		}
+	  	}
+	  };
+	  window.addEventListener("keydown", onkey, true);
+
+
+		/*
+		Handle window resizes
+		*/
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			effect.setSize( window.innerWidth, window.innerHeight );
+		}
+		window.addEventListener( 'resize', onWindowResize, false );
+	</script>
+</html>
